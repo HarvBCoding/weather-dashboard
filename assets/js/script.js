@@ -1,8 +1,12 @@
 const weatherApiRootUrl = 'https://api.openweathermap.org';
 const weatherApiKey = 'd91f911bcf2c0f925fb6535547a5ddc9';
-const city = document.querySelector('#searchTerm').value;
+let city = document.querySelector('#searchTerm').value;
 const todayEl = document.querySelector('#today');
+const forecastEl = document.querySelector('#forecast');
+const searchHistoryEl = document.querySelector('#history');
 const now = new Date();
+let cities = [];
+
 function formatDate(date) {
   var year = date.getFullYear();
 
@@ -14,8 +18,16 @@ function formatDate(date) {
   return month + '/' + day + '/' + year;
 }
 
+function addDays(date, days) {
+  let futureDays = new Date(date);
+  futureDays.setDate(futureDays.getDate() + days);
+  futureDays = formatDate(futureDays);
+  return futureDays;
+}
+
 
 function displayCurrent(current) {
+  todayEl.textContent = "";
   let cityTitle = document.createElement("h3");
   cityTitle.setAttribute("class", "title");
   cityTitle.textContent = `${city} (${formatDate(now)})`;
@@ -23,31 +35,66 @@ function displayCurrent(current) {
 
   let weatherDetails = document.createElement("p")
   weatherDetails.setAttribute("class", "details")
-  weatherDetails.textContent = 
-    `Temp: ${current.temp}
-    Wind: ${current.wind_speed}
-    Humidity: ${current.humidity}
-    UV Index: ${current.uvi}`
+  weatherDetails.innerHTML = `<div> Temp: ${current.temp} °F </div> 
+  <div>Wind: ${current.wind_speed} MPH </div> 
+  <div>Humidity: ${current.humidity}% </div>
+  <div>UV Index: <span>${current.uvi}</span> </div>`;
+
   cityTitle.appendChild(weatherDetails);
 
-//Use jQuery to add to here:
-// <section
-   //           id="today"
-     //       ></section>
 }
 
 function displayFiveDay(daily) {
-//Use jQuery to add to here:
-// <section
-   //           id="forecast"
-     //       ></section>
+  const forecastTitle = document.querySelector('#forecastTitle') ;
+  forecastTitle.textContent = "5-Day Forecast:"
+  forecastEl.innerHTML = "";
+  for  (let i = 1; i < 6; i++) {
+    const cardEl = document.createElement("div");
+    cardEl.classList.add("card", "bg-primary");
+    const cardHeader = document.createElement("h4");
+    cardHeader.classList.add("card-title");
+    cardHeader.textContent = addDays(now, i)
+
+    const weatherIcon = document.createElement("img");
+    const icon = daily[i].weather[0].icon
+    weatherIcon.setAttribute("src", `http://openweathermap.org/img/wn/${icon}.png`);
+
+    const cardText = document.createElement("p");
+    cardText.classList.add = "card-text";
+    cardText.innerHTML = `<div> Temp: ${daily[i].temp.day} °F</div>
+      <div> Wind: ${daily[i].wind_speed} MPH </div>
+      <div> Humidity: ${daily[i].humidity}%`
+
+    cardEl.appendChild(cardHeader)
+    forecastEl.appendChild(cardEl)
+    cardEl.appendChild(weatherIcon);
+    cardEl.appendChild(cardText);
+    
+  }
 }
 
 function saveToLocalState(city) {
-    localStorage.setItem("city", city);
+    cities.push(city);
+    localStorage.setItem("city", JSON.stringify(cities));
 }
 
+function loadLocalStorage() {
+  let history = JSON.parse(localStorage.getItem("city"))
+  console.log(history);
+
+  for (let i = 0; i < history.length; i++) {
+    let citiesButton = document.createElement("button");
+    citiesButton.textContent = history[i];
+
+    searchHistoryEl.appendChild(citiesButton);
+
+  }
+
+}
+
+loadLocalStorage()
 function searchCityWeather() {
+  city = document.querySelector('#searchTerm').value;
   fetch(`${weatherApiRootUrl}/geo/1.0/direct?q=${city}&limit=5&appid=${weatherApiKey}`)
   .then(function (res) {
     return res.json();
