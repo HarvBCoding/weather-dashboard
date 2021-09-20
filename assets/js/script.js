@@ -137,5 +137,5 @@ function searchCityWeather() {
 $("#history").click(function() {
   let oldSearch = event.target.id
   city = oldSearch;
-  console.log(city);
+  searchCityWeather(city);
 })
