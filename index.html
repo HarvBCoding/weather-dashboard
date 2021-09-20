@@ -22,20 +22,22 @@
   </head>
 
   <body>
-    <header>Weather Dashboard</header>
+    <header class="p-3 bg-info text-white text-center font-weight-bold">
+      <h1>Weather Dashboard</h1>
+    </header>
     <div class="container-fluid" style="max-width: 1400px">
       <div class="row">
         <aside class="col-12 col-md-3">
-          <h2 id="form-heading">
+          <h3 class="m-2 font-weight-bold w-100" id="form-heading">
             Search for a City:
-          </h2>
-    <input type="text" id="searchTerm" placeholder="Type in a city!"/>
-    <button onclick="searchCityWeather()">Search!</button>
-          <div class="list-group" id="history">
+          </h3>
+          <input type="text" id="searchTerm" class="d-block w-100 p-2 m-2" placeholder="Type in a city!"/>
+          <button class="d-block w-100 m-2 btn btn-info" onclick="searchCityWeather()">Search!</button>
+          <div class="list-group border-top border-secondary w-100" id="history">
           </div>
         </aside>
           <div class="col-12 col-md-9">
-            <section id="today"></section>
+            <section class="m-2 p-2" id="today"></section>
             <h4 id="forecastTitle"></h4>
             <section id="forecast" class="card-deck"></section>
           </div>

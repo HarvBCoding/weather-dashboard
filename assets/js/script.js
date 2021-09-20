@@ -26,12 +26,17 @@ function addDays(date, days) {
 }
 
 
-function displayCurrent(current) {
+function displayCurrent(current, city) {
+  todayEl.classList.add("border", "border-secondary")
   todayEl.textContent = "";
+  let icon = current.weather[0].icon
   let cityTitle = document.createElement("h3");
-  cityTitle.setAttribute("class", "title");
+  let weatherIcon = document.createElement("img");
+  weatherIcon.setAttribute("src", `http://openweathermap.org/img/wn/${icon}.png`)
+  cityTitle.setAttribute("class", "title font-weight-bold");
   cityTitle.textContent = `${city} (${formatDate(now)})`;
   todayEl.appendChild(cityTitle);
+  cityTitle.appendChild(weatherIcon);
 
   let weatherDetails = document.createElement("p")
   weatherDetails.setAttribute("class", "details")
@@ -40,7 +45,7 @@ function displayCurrent(current) {
   <div>Humidity: ${current.humidity}% </div>
   <div>UV Index: <span>${current.uvi}</span> </div>`;
 
-  cityTitle.appendChild(weatherDetails);
+  todayEl.appendChild(weatherDetails);
 
 }
 
@@ -50,7 +55,7 @@ function displayFiveDay(daily) {
   forecastEl.innerHTML = "";
   for  (let i = 1; i < 6; i++) {
     const cardEl = document.createElement("div");
-    cardEl.classList.add("card", "bg-primary");
+    cardEl.classList.add("card", "bg-secondary");
     const cardHeader = document.createElement("h4");
     cardHeader.classList.add("card-title");
     cardHeader.textContent = addDays(now, i)
@@ -90,6 +95,7 @@ function loadLocalStorage() {
       let citiesButton = document.createElement("button");
       citiesButton.textContent = cities[i];
       citiesButton.setAttribute("id", cities[i]);
+      citiesButton.setAttribute("class", "m-2 w-100 btn btn-secondary")
 
       searchHistoryEl.appendChild(citiesButton);
 
@@ -120,12 +126,13 @@ function searchCityWeather() {
     console.log(body)
     const current = body.current;
     const daily = body.daily;
-    displayCurrent(current);
+    displayCurrent(current, city);
     displayFiveDay(daily);
     saveToLocalState(city);
     let newCitiesButton = document.createElement("button");
       newCitiesButton.textContent = city;
       newCitiesButton.setAttribute("id", city);
+      newCitiesButton.setAttribute("class", "m-2 w-100 btn btn-secondary")
 
       searchHistoryEl.appendChild(newCitiesButton);
   })
@@ -135,7 +142,30 @@ function searchCityWeather() {
 }
 
 $("#history").click(function() {
-  let oldSearch = event.target.id
-  city = oldSearch;
-  searchCityWeather(city);
+  let city = event.target.id
+  fetch(`${weatherApiRootUrl}/geo/1.0/direct?q=${city}&limit=5&appid=${weatherApiKey}`)
+  .then(function (res) {
+    return res.json();
+  })
+  .then(function (body) {
+    console.log('body', body);
+    const lat = body[0].lat;
+    const lon = body[0].lon;
+    console.log(lat, lon);
+    return fetch(`${weatherApiRootUrl}/data/2.5/onecall?lat=${lat}&lon=${lon}&units=imperial&exclude=minutely,hourly&appid=${weatherApiKey}`)
+  })
+  .then(function (res) {
+    return res.json();
+  })
+  .then(function (body) {
+    console.log(body)
+    const current = body.current;
+    const daily = body.daily;
+    displayCurrent(current, city);
+    displayFiveDay(daily);
+  })
+  .catch(function (error) {
+    console.log(error)
+  });
 })
+
