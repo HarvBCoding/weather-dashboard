@@ -73,27 +73,34 @@ function displayFiveDay(daily) {
   }
 }
 
+
 function saveToLocalState(city) {
     cities.push(city);
     localStorage.setItem("city", JSON.stringify(cities));
 }
 
 function loadLocalStorage() {
-  let history = JSON.parse(localStorage.getItem("city"))
-  console.log(history);
+  cities = JSON.parse(localStorage.getItem("city"))
+  if (!cities) {
+    cities = [];
 
-  for (let i = 0; i < history.length; i++) {
-    let citiesButton = document.createElement("button");
-    citiesButton.textContent = history[i];
+  } else {
 
-    searchHistoryEl.appendChild(citiesButton);
+    for (let i = 0; i < cities.length; i++) {
+      let citiesButton = document.createElement("button");
+      citiesButton.textContent = cities[i];
+      citiesButton.setAttribute("id", cities[i]);
 
-  }
+      searchHistoryEl.appendChild(citiesButton);
 
+    };
+  };
 }
 
 loadLocalStorage()
+
 function searchCityWeather() {
+  
   city = document.querySelector('#searchTerm').value;
   fetch(`${weatherApiRootUrl}/geo/1.0/direct?q=${city}&limit=5&appid=${weatherApiKey}`)
   .then(function (res) {
@@ -116,8 +123,19 @@ function searchCityWeather() {
     displayCurrent(current);
     displayFiveDay(daily);
     saveToLocalState(city);
+    let newCitiesButton = document.createElement("button");
+      newCitiesButton.textContent = city;
+      newCitiesButton.setAttribute("id", city);
+
+      searchHistoryEl.appendChild(newCitiesButton);
   })
   .catch(function (error) {
     console.log(error)
   });
 }
+
+$("#history").click(function() {
+  let oldSearch = event.target.id
+  city = oldSearch;
+  console.log(city);
+})
